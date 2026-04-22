@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+COPY . /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        build-essential \
+        cmake \
+        gawk \
+        git \
+        libffi-dev \
+        libicu-dev \
+        ninja-build \
+        pkg-config \
+    && pip install --no-cache-dir --upgrade pip setuptools wheel pygments \
+    && pip install --no-cache-dir -r requirements.txt \
+    && mkdir -p /root/.cheat.sh/log /root/.cheat.sh/spool \
+    && apt-get purge -y --auto-remove build-essential cmake libffi-dev ninja-build pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["python3", "-u", "bin/srv.py"]
+CMD [""]

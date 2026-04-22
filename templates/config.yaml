@@ -1,0 +1,43 @@
+adapters:
+  active:
+    - tldr
+    - cheat
+    - cheat.sheets
+    - cheat.sheets dir
+    - learnxiny
+    - question
+  mandatory:
+    - search
+
+cache:
+  type: redis
+  redis:
+    host: redis
+    port: 6379
+    db: 0
+    prefix: ""
+
+log:
+  level: 4
+
+path:
+  repositories: /app/upstream
+
+routing:
+  pre:
+    - ["^$", "search"]
+    - ["^:", "internal"]
+    - ["/:list$", "internal"]
+    - ["/$", "cheat.sheets dir"]
+  main:
+    - ["", "cheat.sheets"]
+    - ["", "cheat"]
+    - ["", "tldr"]
+    - ["", "learnxiny"]
+  post:
+    - ["^[^/ +]*$", "unknown"]
+  default: question
+
+server:
+  bind: 0.0.0.0
+  port: 80
