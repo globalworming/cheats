@@ -18,6 +18,7 @@ Normal lookups prefer your personal sheets first when a matching topic exists.
 - `git`
 - `docker`
 - Docker Compose (`docker compose`)
+- KDE Plasma with Klipper, `qdbus6`, and `dbus-monitor` for `scripts/autolookup.sh`
 
 ## Initial Setup
 
@@ -63,11 +64,21 @@ curl 11.76.88.254/personal:git
 # with client
 CHTSH_URL=11.76.88.254 cht.sh tar # client script
 CHTSH_URL=11.76.88.254 cht.sh --shell # client script interactive
-cheat() { echo "$1" | cht.sh --shell; }; cheat git
-echo "stealth" | CHTSH_URL=11.76.88.254 cht.sh --shell # automated local lookup does not work that well
+cht.sh tar # if your local client is already pinned to the local server
 ```
 
-automated reading of clipboard is intrusive, better stick to direct invocation
+## Autolookup
+
+For a terminal-driven lookup workflow on KDE Plasma, use `scripts/autolookup.sh`.
+It listens for Klipper clipboard updates, extracts the first token from copied
+text, stores each new first word once, and redraws the terminal with the
+corresponding local cheat lookup whenever that first token changes.
+
+Start it in a terminal:
+
+```bash
+./scripts/autolookup.sh
+```
 
 ## Offline Behavior
 
@@ -129,14 +140,9 @@ docker compose up -d --build
 - `scripts/init_sources.sh`: clone and patch the upstream app plus mirrored content
 - `scripts/update.sh`: refresh mirrors and restart the stack
 - `scripts/apply_airgap_patch.sh`: reapply local-only config and code patches after upstream updates
+- `scripts/autolookup.sh`: KDE Klipper clipboard watcher that reopens `less` for each new first word
 - `sources/personal/`: tracked personal knowledge base, mounted into the running service
 - `templates/config.yaml`: offline-only `cheat.sh` config override
 - `templates/personal.py`: local flat-file adapter for the personal source
 - `templates/question.py`: deterministic response for unsupported free-form queries
 - `templates/Dockerfile.airgapped`: image build without network fetch during container build
-
-## stealth mode
-
-```
-echo "stealth" | (CHTSH_URL=http://11.76.88.254 cht.sh --shell)
-```
