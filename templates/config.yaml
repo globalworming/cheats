@@ -1,5 +1,6 @@
 adapters:
   active:
+    - personal
     - tldr
     - cheat
     - cheat.sheets
@@ -30,6 +31,7 @@ routing:
     - ["/:list$", "internal"]
     - ["/$", "cheat.sheets dir"]
   main:
+    - ["", "personal"]
     - ["", "cheat.sheets"]
     - ["", "cheat"]
     - ["", "tldr"]

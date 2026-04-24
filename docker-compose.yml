@@ -26,3 +26,4 @@ services:
     restart: unless-stopped
     volumes:
       - ./app/upstream:/app/upstream:ro
+      - ./sources/personal:/app/personal:ro
