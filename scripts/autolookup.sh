@@ -11,12 +11,10 @@
 # - [x] read the current clipboard contents from Klipper after each signal
 # - [x] extract the first whitespace-delimited token from the clipboard text
 # - [x] ignore empty tokens and repeated tokens that match the current lookup
-# - [x] append each newly seen token once to a persistent words file
-#   - [ ] review
-# - [x] render only the latest lookup into a cache file
-# - [x] show that cache file in `less -R` positioned at the top
+# - [x] render only the latest lookup into a temporary file
+# - [x] show that temporary file in `less -R` positioned at the top
 # - [x] when a new token arrives, stop the current pager and reopen it on the
-#   refreshed cache file
+#   refreshed temporary file
 #
 # User-visible examples:
 # - copying `git` looks up `git`
@@ -25,10 +23,8 @@
 #
 # Expected runtime shape:
 # - the terminal view should behave like `cht.sh <word> | less -R`
-# - the pager always shows the latest lookup result, not a history buffer
-# - the words file is only a trace of unique first tokens that were seen
-#   - [ ] why? review, yagni
-#
+# - the pager always shows the latest lookup result
+# 
 # Required host dependencies:
 # - KDE Plasma with Klipper
 # - `qdbus6`
@@ -38,24 +34,15 @@
 #
 # Environment overrides:
 # - `AUTOLOOKUP_CHTSH_COMMAND`
-# - `AUTOLOOKUP_STATE_DIR`
-# - `AUTOLOOKUP_CACHE_DIR`
-# - `AUTOLOOKUP_WORDS_FILE`
-# - `AUTOLOOKUP_RENDER_FILE`
 
 set -euo pipefail
-
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 KLIPPER_SERVICE="org.kde.klipper"
 KLIPPER_PATH="/klipper"
 KLIPPER_INTERFACE="org.kde.klipper.klipper"
 
-AUTOLOOKUP_STATE_DIR="${AUTOLOOKUP_STATE_DIR:-${REPO_ROOT}/.autolookup/state}"
-AUTOLOOKUP_CACHE_DIR="${AUTOLOOKUP_CACHE_DIR:-${REPO_ROOT}/.autolookup/cache}"
-AUTOLOOKUP_WORDS_FILE="${AUTOLOOKUP_WORDS_FILE:-${AUTOLOOKUP_STATE_DIR}/autolookup.words}"
-AUTOLOOKUP_RENDER_FILE="${AUTOLOOKUP_RENDER_FILE:-${AUTOLOOKUP_CACHE_DIR}/autolookup.current}"
 AUTOLOOKUP_CHTSH_COMMAND="${AUTOLOOKUP_CHTSH_COMMAND:-cht.sh}"
+AUTOLOOKUP_RENDER_FILE=""
 
 pager_pid=""
 current_word=""
@@ -74,6 +61,13 @@ cleanup() {
     wait "${pager_pid}" 2>/dev/null || true
   fi
 
+  if [[ -n "${AUTOLOOKUP_RENDER_FILE}" ]]; then
+    rm -f "${AUTOLOOKUP_RENDER_FILE}"
+  fi
+}
+
+init_render_file() {
+  AUTOLOOKUP_RENDER_FILE="$(mktemp)"
 }
 
 restart_pager() {
@@ -105,17 +99,6 @@ get_clipboard_contents() {
   qdbus6 "${KLIPPER_SERVICE}" "${KLIPPER_PATH}" "${KLIPPER_INTERFACE}.getClipboardContents"
 }
 
-record_word() {
-  local word="$1"
-
-  mkdir -p "${AUTOLOOKUP_STATE_DIR}"
-  touch "${AUTOLOOKUP_WORDS_FILE}"
-
-  if ! grep -Fqx "${word}" "${AUTOLOOKUP_WORDS_FILE}"; then
-    printf '%s\n' "${word}" >>"${AUTOLOOKUP_WORDS_FILE}"
-  fi
-}
-
 render_lookup() {
   local word="$1"
   local tmp_render
@@ -145,7 +128,6 @@ refresh_from_clipboard() {
   fi
 
   current_word="${word}"
-  record_word "${word}"
   render_lookup "${word}"
   restart_pager
 }
@@ -157,12 +139,10 @@ main() {
   require_command dbus-monitor
   require_command less
   require_command awk
-  require_command grep
   require_command mktemp
   require_command "${AUTOLOOKUP_CHTSH_COMMAND}"
 
-  mkdir -p "${AUTOLOOKUP_CACHE_DIR}" "${AUTOLOOKUP_STATE_DIR}"
-
+  init_render_file
   render_waiting_screen
   restart_pager
   refresh_from_clipboard || true
