@@ -11,12 +11,7 @@ adapters:
     - search
 
 cache:
-  type: redis
-  redis:
-    host: redis
-    port: 6379
-    db: 0
-    prefix: ""
+  type: none
 
 log:
   level: 4
