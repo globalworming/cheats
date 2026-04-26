@@ -1,5 +1,48 @@
 #!/usr/bin/env bash
 
+# Autolookup
+#
+# Host-side KDE/Plasma clipboard watcher for the local cheat.sh deployment.
+# This stays outside the container stack and acts only as a terminal helper
+# around the local `cht.sh` client.
+#
+# TODO:
+# - [x] subscribe to Klipper clipboard change signals over D-Bus; do not poll
+# - [x] read the current clipboard contents from Klipper after each signal
+# - [x] extract the first whitespace-delimited token from the clipboard text
+# - [x] ignore empty tokens and repeated tokens that match the current lookup
+# - [x] append each newly seen token once to a persistent words file
+#   - [ ] review
+# - [x] render only the latest lookup into a cache file
+# - [x] show that cache file in `less -R` positioned at the top
+# - [x] when a new token arrives, stop the current pager and reopen it on the
+#   refreshed cache file
+#
+# User-visible examples:
+# - copying `git` looks up `git`
+# - copying `git status` still looks up `git`
+# - copying `git status` again does not interfer with pager as `git` is already current
+#
+# Expected runtime shape:
+# - the terminal view should behave like `cht.sh <word> | less -R`
+# - the pager always shows the latest lookup result, not a history buffer
+# - the words file is only a trace of unique first tokens that were seen
+#   - [ ] why? review, yagni
+#
+# Required host dependencies:
+# - KDE Plasma with Klipper
+# - `qdbus6`
+# - `dbus-monitor`
+# - `less`
+# - `cht.sh`
+#
+# Environment overrides:
+# - `AUTOLOOKUP_CHTSH_COMMAND`
+# - `AUTOLOOKUP_STATE_DIR`
+# - `AUTOLOOKUP_CACHE_DIR`
+# - `AUTOLOOKUP_WORDS_FILE`
+# - `AUTOLOOKUP_RENDER_FILE`
+
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
