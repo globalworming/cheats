@@ -1,27 +1,45 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
-COPY . /app
+COPY requirements.txt /app/requirements.txt
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        bash \
         build-essential \
         cmake \
-        gawk \
-        git \
         libffi-dev \
         libicu-dev \
         ninja-build \
         pkg-config \
-    && pip install --no-cache-dir --upgrade pip setuptools wheel pygments \
-    && pip install --no-cache-dir -r requirements.txt \
+    && python -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel pygments \
+    && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM python:3.11-slim AS runtime
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:${PATH}"
+
+WORKDIR /app
+COPY . /app
+COPY --from=builder /opt/venv /opt/venv
+
+RUN apt-get update \
+    && ICU_PKG="$(apt-cache search '^libicu[0-9][0-9]*$' | cut -d' ' -f1 | sort -V | tail -n1)" \
+    && test -n "${ICU_PKG}" \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        gawk \
+        libffi8 \
+        "${ICU_PKG}" \
     && mkdir -p /root/.cheat.sh/log /root/.cheat.sh/spool \
-    && apt-get purge -y --auto-remove build-essential cmake libffi-dev ninja-build pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["python3", "-u", "bin/srv.py"]
