@@ -1,3 +1,6 @@
 ## up, increasingly destructive
-    docker compose up -d --build --force-recreate --renew-anon-volumes
-    
+docker compose up -d --build --force-recreate --renew-anon-volumes
+## down, increasingly destructive
+docker compose down -p ${name:-$(basename $(pwd))} --rmi all --volumes --remove-orphans
+## magic
+docker compose run --rm --entrypoint bash $name -lc 'sleep inf' ### run service, custom entrypoint 

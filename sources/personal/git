@@ -1,17 +1,18 @@
 ## Status
-   git status --short --branch
-   git log --oneline --decorate -n 5
+git status --short --branch
+git log --oneline --decorate -n 5
 ## Diff
-   git diff --cached
-   git diff --word-diff
-   git diff main -- path/to/file
-   git show main:path/to/file
+git diff --cached
+git diff --word-diff
+git diff main -- path/to/file
+git show main:path/to/file
 ## Safe sync
-   git fetch --all --prune
-   git pull --ff-only
+git fetch --all --prune
+git pull --ff-only
+git stash && git pull && git stash pop
 # ⚠️ Danger zone ⚠️
 ## Force push
-   git push --force-with-lease
+git push --force-with-lease
 ## Branch cleanup
-   git branch --merged | grep -v '^*' | xargs -r git branch -d
-   git remote prune origin
+git branch --merged | grep -v '^*' | xargs -r git branch -d
+git remote prune origin

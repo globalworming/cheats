@@ -1,5 +1,7 @@
-- [ ] git pull with stash, ensure back to original state when errors, `git stash && git pull && git stash pop` what error handling?
 
 ## TODO
 
-- [ ] check app/Dockerfile
+- [ ] offline message should show only commands that work locally
+- [ ] properly review the Dockerfile
+- [ ] bash completion? 
+- [ ] route to live fallback?
