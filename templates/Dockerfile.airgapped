@@ -28,7 +28,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/opt/venv/bin:${PATH}"
 
 WORKDIR /app
-COPY . /app
 COPY --from=builder /opt/venv /opt/venv
 
 RUN apt-get update \
@@ -41,6 +40,8 @@ RUN apt-get update \
         "${ICU_PKG}" \
     && mkdir -p /root/.cheat.sh/log /root/.cheat.sh/spool \
     && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
 
 ENTRYPOINT ["python3", "-u", "bin/srv.py"]
 CMD [""]
