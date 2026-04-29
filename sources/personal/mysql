@@ -1,0 +1,1 @@
+mysql -N -B -e "SELECT 1"
