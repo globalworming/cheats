@@ -7,7 +7,7 @@ It builds a local stack with:
 - upstream `cheat.sh` cloned into `app/`
 - mirrored content repositories in `app/upstream/`
 - tracked personal sheets in `sources/personal/`, mounted into the app as a local source
-- Redis for the cache layer
+- ~Redis for the cache layer~ turned off for personal use
 - Docker Compose on a fixed IP `11.76.88.254`
 
 The local service serves mirrored cheat sheet repositories offline. Free-form programming-language questions such as `/python/read+json` are intentionally disabled and return a local offline-only message instead of attempting upstream network access.
