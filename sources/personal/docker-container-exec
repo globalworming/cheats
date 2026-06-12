@@ -1,0 +1,2 @@
+ docker compose  exec --user www-data shop bash -c "/var/www/html/bin/console cache:clear"
+ docker compose  exec --user www-data shop bash -c 'mysql -N -B -e "SELECT 0"'
