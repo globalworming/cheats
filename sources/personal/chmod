@@ -1,1 +1,1 @@
-chmod u+x PATH # make executable for current user
+    chmod u+x PATH # make executable for current user
