@@ -1,3 +1,10 @@
-    source <(kubectl completion bash) # for autocompleion
-
-    kubectl get pods -o wide -A # with IP and in all namespaces
+## setup
+    source <(kubectl completion bash) # for autocompletion
+    echo "export KUBE_EDITOR=/usr/bin/joe" >> ~/.bashrc # set your editor 
+## view  
+    kubectl get all -o wide -A # with IP and node, and in all namespaces
+    kubectl get deployments
+    minikube addons enable metrics-server
+    kubectl top pod --sort-by cpu  
+## connect
+    minikube service --all # returns urls to connect to
